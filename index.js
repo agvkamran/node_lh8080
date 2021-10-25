@@ -159,8 +159,25 @@ const handleDelete = (req, res, db) => {
     }
 }
 
-const handleChangeNote = () => {
-
+const handleChangeNote = (req, res, db) => {
+    if (req.body.id) {
+        const { id } = req.body;
+        db
+            .collection('notes')
+            .updateOne({ id }, { $set: req.body })
+            .then(_ => {
+                res.statusCode = 200;
+                res.end('Note was edited')
+            })
+            .catch(e => {
+                res.statusCode = 500;
+                res.end('Err editing')
+                console.error('handleChangeNote', e)
+            })
+    } else {
+        res.statusCode = 400;
+        res.end('Not valid data')
+    }
 }
 
 const handleGetNote = (req, res, db) => {
@@ -187,6 +204,7 @@ mongo.connect(url, (err, client) => {
     app.get('/note', (req, res) => handleGetNote(req, res, db));
     app.post('/note', (req, res) => handleAddNote(req, res, db));
     app.delete('/note', (req, res) => handleDelete(req, res, db));
+    app.put('/note'), (req, res) => handleChangeNote(req, res, db);
 
     app.listen(8080, () => {
         console.log('listening 8080')
